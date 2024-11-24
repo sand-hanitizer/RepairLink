@@ -1,7 +1,11 @@
 import streamlit as st
+import requests
 from st_aggrid import AgGrid, GridOptionsBuilder
 import pandas as pd
 from streamlit_option_menu import option_menu
+
+API_URL = "http://127.0.0.1:8000/api"
+
 
 # Initialize session state for shared data
 if "data" not in st.session_state:
@@ -63,30 +67,59 @@ if page == "Supplier Page":
 
         if submit:
             # Check if the sensor ID already exists
-            existing_sensor = next((s for s in st.session_state.data["sensors"] if s["sensor_id"] == sensor_id), None)
-            if existing_sensor:
-                # Update existing sensor
-                existing_sensor.update({
-                    "batch_number": batch_number,
-                    "status": status,
-                    "manufacturer_date": manufacturer_date,
-                    "shipment_date": shipment_date,
-                })
-                st.success(f"Sensor with ID '{sensor_id}' updated successfully!")
-            else:
-                # Add new sensor
-                st.session_state.data["sensors"].append({
-                    "sensor_id": sensor_id,
-                    "batch_number": batch_number,
-                    "status": status,
-                    "manufacturer_date": manufacturer_date,
-                    "shipment_date": shipment_date
-                })
-                st.success("Sensor added successfully!")
+            payload = {
+                "sensor_id": sensor_id,
+                "batch_number": batch_number,
+                "status": status,
+                "manufacturer_date": str(manufacturer_date),
+                "shipment_date": str(shipment_date),
+            }
+
+            try:
+                # Check if the sensor ID already exists by querying the backend
+                response = requests.get(f"{API_URL}/sensors/{sensor_id}")
+                if response.status_code == 200:
+                    # If the sensor exists, update it using the PUT method
+                    update_response = requests.put(f"{API_URL}/sensors/{sensor_id}", json=payload)
+                    if update_response.status_code == 200:
+                        st.success(f"Sensor with ID '{sensor_id}' updated successfully!")
+                    else:
+                        st.error(f"Failed to update sensor. Error: {update_response.json().get('detail', 'Unknown error')}")
+                elif response.status_code == 404:
+                    # If the sensor does not exist, create a new one using the POST method
+                    create_response = requests.post(f"{API_URL}/sensors", json=payload)
+                    if create_response.status_code == 200:
+                        st.success("Sensor added successfully!")
+                    else:
+                        st.error(f"Failed to add sensor. Error: {create_response.json().get('detail', 'Unknown error')}")
+                else:
+                    st.error(f"Unexpected response from the server: {response.status_code}")
+            except Exception as e:
+                st.error(f"Failed to connect to the backend. Error: {e}")
 
     # Display dynamic table for sensors
-    st.write("### Current Sensors")
-    display_dynamic_table(st.session_state.data["sensors"], "sensor")
+    def fetch_sensors_data():
+        try:
+            response = requests.get('http://127.0.0.1:8000/api/sensors')
+            # Check if the request was successful
+            if response.status_code == 200:
+                return response.json()  # Assuming the response is a list of sensors
+            else:
+                st.error(f"Failed to fetch sensors data. Status code: {response.status_code}")
+                return []
+        except Exception as e:
+            st.error(f"Error fetching sensors data: {e}")
+            return []
+
+    # Fetch the sensors data when the app loads
+    sensors_data = fetch_sensors_data()
+
+    # Check if data exists and display it
+    if sensors_data:
+        st.write("### Current Sensors")
+        st.dataframe(sensors_data)  # Display the sensors data as a dynamic table
+    else:
+        st.write("No sensor data available.")
 
 # ---------------------- OEM Page ----------------------
 elif page == "OEM Page":
