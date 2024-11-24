@@ -55,7 +55,9 @@ async def add_drone(drone: Drone):
         raise HTTPException(status_code=400, detail="Sensor ID does not exist.")
     if db.drones.find_one({"drone_id": drone.drone_id}):
         raise HTTPException(status_code=400, detail="Drone ID already exists.")
-    db.drones.insert_one(drone.dict())
+    drone_data = drone.dict()
+    drone_data["assembly_date"] = datetime.combine(drone.assembly_date, datetime.min.time())
+    db.drones.insert_one(drone_data)
     return {"message": "Drone added successfully"}
 
 @app.get("/api/drones")
@@ -68,7 +70,9 @@ async def get_drones():
 async def add_feedback(feedback: Feedback):
     if db.feedback.find_one({"feedback_id": feedback.feedback_id}):
         raise HTTPException(status_code=400, detail="Feedback ID already exists.")
-    db.feedback.insert_one(feedback.dict())
+    feedback_data = feedback.dict()
+    feedback_data["feedback_date"] = datetime.combine(feedback.feedback_date, datetime.min.time())
+    db.feedback.insert_one(feedback_data)
     return {"message": "Feedback added successfully"}
 
 @app.get("/api/feedback")
