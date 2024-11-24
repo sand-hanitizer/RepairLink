@@ -7,11 +7,11 @@ from streamlit_option_menu import option_menu
 if "data" not in st.session_state:
     st.session_state.data = {
         "sensors": [],      # List of sensors (for Supplier Page)
-        "actuators": [],    # List of actuators (for OEM Page)
+        "drones": [],    # List of drones (for OEM Page)
         "feedback": []      # List of feedback (for Retailer Page)
     }
 
-# Sidebar for navigation
+# Navbar for navigation
 with st.sidebar:
     page = option_menu(
         menu_title="Navigation",
@@ -92,17 +92,17 @@ if page == "Supplier Page":
 elif page == "OEM Page":
     st.title("🔧 OEM Dashboard")
     st.markdown("""
-    ### Assemble Actuators
-    Track and manage the integration of sensors into actuators.
+    ### Assemble drones
+    Track and manage the integration of sensors into drones.
     """)
     st.write("---")
 
-    # Form to assemble or update actuators
-    with st.form("assemble_actuator_form"):
+    # Form to assemble or update drones
+    with st.form("assemble_drone_form"):
         col1, col2 = st.columns(2)
 
         with col1:
-            actuator_id = st.text_input("Actuator ID", placeholder="Enter actuator ID to add or update")
+            drone_id = st.text_input("Drone ID", placeholder="Enter drone ID to add or update")
             sensor_id = st.selectbox(
                 "Select Sensor", 
                 [s["sensor_id"] for s in st.session_state.data["sensors"]]
@@ -113,34 +113,33 @@ elif page == "OEM Page":
             assembly_date = st.date_input("Assembly Date")
             status = st.selectbox("Status", ["Assembled", "Shipped"])
 
-        submit = st.form_submit_button("Add or Update Actuator")
-
+        submit = st.form_submit_button("Add or Update Drone")
         if submit:
-            # Check if the actuator ID already exists
-            existing_actuator = next((a for a in st.session_state.data["actuators"] if a["actuator_id"] == actuator_id), None)
-            if existing_actuator:
-                # Update existing actuator
-                existing_actuator.update({
+            # Check if the drone ID already exists
+            existing_drone = next((a for a in st.session_state.data["drones"] if a["drone_id"] == drone_id), None)
+            if existing_drone:
+                # Update existing drone
+                existing_drone.update({
                     "sensor_id": sensor_id,
                     "assembly_date": assembly_date,
                     "status": status,
                 })
-                st.success(f"Actuator with ID '{actuator_id}' updated successfully!")
+                st.success(f"drone with ID '{drone_id}' updated successfully!")
             elif sensor_id == "No sensors available":
                 st.error("No sensors available for assembly.")
             else:
-                # Add new actuator
-                st.session_state.data["actuators"].append({
-                    "actuator_id": actuator_id,
+                # Add new drone
+                st.session_state.data["drones"].append({
+                    "drone_id": drone_id,
                     "sensor_id": sensor_id,
                     "assembly_date": assembly_date,
                     "status": status
                 })
-                st.success("Actuator added successfully!")
+                st.success("drone added successfully!")
 
-    # Display dynamic table for actuators
-    st.write("### Current Actuators")
-    display_dynamic_table(st.session_state.data["actuators"], "actuator")
+    # Display dynamic table for drones
+    st.write("### Current drones")
+    display_dynamic_table(st.session_state.data["drones"], "drone")
 
 # ---------------------- Retailer Page ----------------------
 elif page == "Retailer Page":
