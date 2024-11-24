@@ -42,7 +42,7 @@ def display_dynamic_table(data, key):
 
 # ---------------------- Supplier Page ----------------------
 if page == "Supplier Page":
-    st.image("assets/supplier_icon.png", width=100)
+    st.image("streamlit_app/assets/supplier_icon.png", width=100)
     st.title("📦 Supplier Dashboard")
     st.markdown("""
     ### Manage Sensors Inventory
