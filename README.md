@@ -12,7 +12,7 @@ RepairLink is a supply chain management project designed to manage sensors (like
 2. Install required Python packages using the `requirements.txt` file:
    ```bash
    pip install -r requirements.txt
-
+---
 ### **Step 2: Set Up MongoDB**
 1. Download and install **MongoDB Compass** from the [official website](https://www.mongodb.com/products/compass).
 2. Start MongoDB locally or configure a cloud-based MongoDB instance.
@@ -26,7 +26,7 @@ RepairLink is a supply chain management project designed to manage sensors (like
 2. Start the FastAPI backend server using **Uvicorn**:
    ```bash
    uvicorn api:app --reload
-
+---
 ### **Step 4: Run the Frontend Application**
 1. Navigate to the project directory in your terminal.
 2. Start the **Streamlit frontend** using the following command:
