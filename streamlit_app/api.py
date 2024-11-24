@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pymongo import MongoClient
-from datetime import date
+from datetime import datetime,date
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -36,7 +36,11 @@ class Feedback(BaseModel):
 async def add_sensor(sensor: Sensor):
     if db.sensors.find_one({"sensor_id": sensor.sensor_id}):
         raise HTTPException(status_code=400, detail="Sensor ID already exists.")
-    db.sensors.insert_one(sensor.dict())
+    sensor_data = sensor.dict()
+    sensor_data["manufacturer_date"] = datetime.combine(sensor.manufacturer_date, datetime.min.time())
+    sensor_data["shipment_date"] = datetime.combine(sensor.shipment_date, datetime.min.time())
+
+    db.sensors.insert_one(sensor_data)
     return {"message": "Sensor added successfully"}
 
 @app.get("/api/sensors")
